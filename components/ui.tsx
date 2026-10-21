@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
 const PAGE_SIZE = 20;
-export function PageHeading({ eyebrow = "YOUR WORKSPACE", title, description, children }: { eyebrow?: string; title: string; description: string; children?: React.ReactNode }) {
-  return <header className="page-heading"><div><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p className="muted">{description}</p></div>{children}</header>;
+export function PageHeading({ title, description, children }: { title: string; description: string; children?: React.ReactNode }) {
+  return <header className="page-heading"><div><h1>{title}</h1><p className="muted">{description}</p></div>{children}</header>;
 }
 export function Pagination({ page, count, base }: { page: number; count: number; base: string }) {
   const total = Math.max(1, Math.ceil(count / PAGE_SIZE));
