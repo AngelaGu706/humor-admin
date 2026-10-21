@@ -1,0 +1,8 @@
+import { votes, pageNumber, dateLabel } from "@/lib/data";
+import { PageHeading, Pagination, Empty, ReadOnly } from "@/components/ui";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
+export default async function Ratings({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const page = pageNumber((await searchParams).page);
+  const { rows, count, media, people } = await votes(page);
+  return <><PageHeading title="Every opinion counts." description="See the community’s upvotes and downvotes, one pick at a time."><ReadOnly/></PageHeading><section className="panel table-panel"><div className="panel-heading"><h2>Rating history <span className="count">{count.toLocaleString()}</span></h2></div>{rows.length ? <div className="table-scroll"><table><thead><tr><th>Food pick</th><th>Member</th><th>Rating</th><th>Date (UTC)</th></tr></thead><tbody>{rows.map(row => { const person = people.find(p => p.id === row.user_id); return <tr key={row.id}><td><strong>{media.find(m => m.id === row.generation_id)?.title ?? "Unavailable content"}</strong><small className="subtext">{row.generation_id}</small></td><td>{[person?.first_name, person?.last_name].filter(Boolean).join(" ") || "Unnamed user"}<small className="subtext">{row.user_id}</small></td><td><span className={`pill ${row.vote === "up" ? "olive" : "terracotta"}`}>{row.vote === "up" ? <ThumbsUp size={13}/> : <ThumbsDown size={13}/>}{row.vote === "up" ? "Upvote" : "Downvote"}</span></td><td className="nowrap">{dateLabel(row.created_at)}</td></tr>; })}</tbody></table></div> : <Empty title="No ratings on this page">Community votes will appear here.</Empty>}<Pagination page={page} count={count} base="/admin/ratings"/></section></>;
+}
