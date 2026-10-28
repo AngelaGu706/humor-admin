@@ -9,6 +9,18 @@ function load(path, imports = {}) {
   return mod.exports;
 }
 const catalog = load('../lib/course-catalog.ts');
+test('model search finds names containing a version dot', async () => {
+  const models = [{ id: 1, name: 'GPT-4.1', provider_model_id: 'gpt-4.1-2025-04-14' }, { id: 2, name: 'GPT-4o', provider_model_id: 'gpt-4o-2024-08-06' }];
+  let filters = [];
+  const query = { select() { return this; }, order() { return this; }, async in() { return { data: [], error: null }; }, or(value) { filters = value.split(','); return this; }, async range() {
+    const data = models.filter(row => filters.some(filter => { const [column, pattern] = filter.split('.ilike.%'); return String(row[column]).toLowerCase().includes(pattern.slice(0, -1).toLowerCase()); }));
+    return { data, count: data.length, error: null };
+  } };
+  const data = load('../lib/course-data.ts', { './course-server': { requireCourseAdmin: async () => ({ supabase: { from: () => query } }) }, './course-catalog': catalog, 'next/navigation': { notFound() { throw new Error('Not found'); }, redirect() { throw new Error('Unexpected redirect'); } } });
+  const result = await data.courseList('models', { q: 'GPT-4.1' });
+  assert.deepEqual(result.rows.map(row => row.name), ['GPT-4.1']);
+  assert.equal(result.count, 1);
+});
 class AccessError extends Error { constructor(status, message) { super(message); this.status = status; } }
 const response = (data, init) => Response.json(data, init);
 function fixture({ deny = false, data = { id: 9, modified_datetime_utc: '2026-10-27T12:00:00Z' }, error = null } = {}) {
