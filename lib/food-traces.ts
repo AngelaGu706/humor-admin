@@ -19,6 +19,23 @@ export function requestStatus(row: Pick<FoodRequest, 'status' | 'created_at'>, n
   return row.status === 'running' && now - Date.parse(row.created_at) > 600000 ? 'Incomplete' : row.status === 'succeeded' ? 'Completed' : row.status === 'failed' ? 'Failed' : 'Running';
 }
 export function milliseconds(value: number | null) { return value === null ? '—' : `${(value / 1000).toFixed(2)}s`; }
+export function traceErrorMessage(code: string) {
+  if (code === 'model_http_503') return 'Model temporarily unavailable';
+  if (code === 'model_http_429') return 'Model rate limit reached';
+  if (code === 'model_http_408' || code === 'model_http_504') return 'Model request timed out';
+  if (code === 'model_http_401' || code === 'model_http_403') return 'Model access denied';
+  if (code === 'model_http_400') return 'Model request rejected';
+  if (/^model_http_5\d{2}$/.test(code)) return 'Model service error';
+  if (/^model_http_\d{3}$/.test(code)) return 'Model request failed';
+  if (code === 'trace_write_failed') return 'Could not save generation record';
+  if (code === 'neighborhood_mismatch') return 'Result did not match the requested neighborhood';
+  return 'Generation failed';
+}
+export function validationStatus(step: Pick<FoodStep, 'validation_passed' | 'output_text'>) {
+  if (step.validation_passed === true) return 'Passed';
+  if (!step.output_text?.trim()) return 'Not run';
+  return step.validation_passed === false ? 'Failed' : 'Not completed';
+}
 export type FoodRequestFilter = 'all' | 'completed' | 'failed';
 export function requestFilter(value: unknown): FoodRequestFilter {
   return value === 'completed' || value === 'failed' ? value : 'all';
