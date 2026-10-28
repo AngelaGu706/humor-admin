@@ -34,13 +34,13 @@ export default function CourseManager({ resourceKey, resource, rows, options, ch
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Could not save this change.");
-      setSelected(null); setMessage(action.mode === "delete" ? "Record deleted." : "Changes saved."); router.refresh();
+      setSelected(null); setMessage(action.mode === "delete" ? "Record deleted" : "Changes saved"); router.refresh();
     } catch (error) { setError(error instanceof Error ? error.message : "Could not save this change."); }
     finally { busyRef.current = false; setBusy(false); }
   }
   if (!resource.fields) return children;
   return <Actions.Provider value={{ resource, open }}>
-    <div className="course-action-bar">{!detail && !resource.updateOnly && <button className="button primary" onClick={() => open("create")}><Plus size={15}/>Add {resource.singular.toLowerCase()}</button>}{detail && rows[0] && <CourseActions row={rows[0]}/>}<span className="muted">{detail ? "Changes apply to this record." : resource.updateOnly ? "Edit an entry to update the mix." : "Open a record to view all fields."}</span></div>
+    <div className="course-action-bar">{!detail && !resource.updateOnly && <button className="button primary" onClick={() => open("create")}><Plus size={15}/>Add {resource.singular.toLowerCase()}</button>}{detail && rows[0] && <CourseActions row={rows[0]}/>}<span className="muted">{detail ? "Changes apply to this record" : resource.updateOnly ? "Edit an entry to update the mix" : "Open a record to view all fields"}</span></div>
     {message && <p className="notice success" role="status">{message}</p>}
     {children}
     <dialog ref={dialog} className="modal course-modal" aria-labelledby="course-modal-title" onCancel={event => { event.preventDefault(); if (!busyRef.current) setSelected(null); }}>
