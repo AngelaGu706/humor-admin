@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Users, MessageSquareText, ThumbsUp, ArrowUpRight, UtensilsCrossed, LogOut, Workflow } from "lucide-react";
-const items = [{ href: "/admin", label: "Overview", icon: LayoutDashboard }, { href: "/admin/requests", label: "Generation requests", icon: Workflow }, { href: "/admin/media", label: "AI content", icon: MessageSquareText }, { href: "/admin/users", label: "Users", icon: Users }, { href: "/admin/ratings", label: "Ratings", icon: ThumbsUp }];
+const items = [{ href: "/admin", label: "Overview", icon: LayoutDashboard }, { href: "/admin/requests", label: "Requests", icon: Workflow }, { href: "/admin/media", label: "AI content", icon: MessageSquareText }, { href: "/admin/users", label: "Users", icon: Users }, { href: "/admin/ratings", label: "Ratings", icon: ThumbsUp }];
 export default function Navigation({ name }: { name: string }) {
   const path = usePathname();
   return <aside className="sidebar"><Link href="/admin" className="brand"><UtensilsCrossed size={22}/><span>NYC FOOD SPOTS<small>ADMIN</small></span></Link><p className="nav-label">MANAGE</p>
