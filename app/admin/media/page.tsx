@@ -9,5 +9,5 @@ export default async function Media({ searchParams }: { searchParams: Promise<{ 
   if (search.generation && !isUuid(search.generation)) notFound();
   const page = search.generation ? 1 : pageNumber(search.page);
   const { rows, count } = await generations(page, search.generation);
-  return <><PageHeading title="AI content" description="Add and manage food recommendations."/>{search.generation && <p className="course-filter-note">Showing the pick linked to this request. <Link className="text-link" href="/admin/media">View all picks</Link></p>}<MediaManager rows={rows} count={count} page={page}/></>;
+  return <><PageHeading title="AI content"/>{search.generation && <p className="course-filter-note">Showing the pick linked to this request. <Link className="text-link" href="/admin/media">View all picks</Link></p>}<MediaManager rows={rows} count={count} page={page}/></>;
 }
