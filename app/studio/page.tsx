@@ -1,0 +1,14 @@
+import Link from "next/link";
+import { Inbox, Network, Braces, MessageSquareText, ArrowRight } from "lucide-react";
+import { courseOverview } from "@/lib/course-data";
+import { PageHeading } from "@/components/ui";
+export default async function CourseOverview() {
+  const { counts, recent } = await courseOverview();
+  const metrics = [{ key: "requests", label: "Generation requests", icon: Inbox }, { key: "chains", label: "Prompt chains", icon: Network }, { key: "responses", label: "Model responses", icon: Braces }, { key: "content", label: "AI captions", icon: MessageSquareText }];
+  return <><PageHeading title="AI overview" description="Explore how the course app generates captions."/>
+    <div className="metric-grid">{metrics.map(({ key, label, icon: Icon }) => <Link className="metric-card" href={`/studio/${key}`} key={key}><div>{label}<Icon size={19}/></div><strong>{counts[key].toLocaleString()}</strong></Link>)}</div>
+    <div className="course-flow" aria-label="Generation flow"><Link href="/studio/requests">Request</Link><ArrowRight size={16}/><Link href="/studio/chains">Prompt chain</Link><ArrowRight size={16}/><Link href="/studio/responses">Model response</Link><ArrowRight size={16}/><Link href="/studio/content">AI caption</Link></div>
+    <div className="dashboard-grid course-overview-grid"><section className="panel"><div className="panel-heading"><div><h2>Recent requests</h2><p>Open a request to see its input and outputs.</p></div><Link className="text-link" href="/studio/requests">View all <ArrowRight size={13}/></Link></div>{recent.length ? <div className="table-scroll"><table><thead><tr><th>Request</th><th>Image</th><th>Created (UTC)</th></tr></thead><tbody>{recent.map(row => <tr key={String(row.id)}><td><Link className="record-reference" href={`/studio/requests/${row.id}`}>Request #{row.id}</Link></td><td><Link className="text-link" href={`/studio/images/${row.image_id}`}>{String(row.image_id).slice(0, 8)}</Link></td><td>{new Date(String(row.created_datetime_utc)).toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" })}</td></tr>)}</tbody></table></div> : <p className="empty muted">No requests yet.</p>}</section>
+    <section className="panel"><div className="panel-heading"><div><h2>Generation setup</h2><p>Review the configuration behind the pipeline.</p></div></div><div className="course-setup-list">{[{ key: "templates", label: "Chain templates" }, { key: "models", label: "Models" }, { key: "terms", label: "Terms" }, { key: "users", label: "Users" }].map(item => <Link key={item.key} href={`/studio/${item.key}`}><span>{item.label}</span><strong>{counts[item.key].toLocaleString()}</strong><ArrowRight size={14}/></Link>)}<Link href="/studio/mix"><span>Chain mix</span><ArrowRight size={14}/></Link></div></section></div>
+  </>;
+}

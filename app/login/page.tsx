@@ -1,5 +1,6 @@
 import { UtensilsCrossed, ShieldCheck } from "lucide-react";
 import LoginButton from "./sign-in";
+import Link from "next/link";
 export default async function Login({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
   const configured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
@@ -8,5 +9,6 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
       <h1>Admin sign-in</h1><p className="muted">Manage food picks, users, and ratings.</p>
       {configured ? <LoginButton failed={Boolean(error)}/> : <p className="notice">Connect the Supabase environment variables to enable sign-in.</p>}
       <p className="auth-note">Administrator access required.</p>
+      <Link href="/course-login" className="text-link">Open course workspace →</Link>
     </section></main>;
 }

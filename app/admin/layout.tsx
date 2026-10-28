@@ -1,6 +1,7 @@
 import Navigation from "@/components/navigation";
 import { requireAdmin } from "@/lib/auth";
 export const dynamic = "force-dynamic";
+export const metadata = { title: "NYC Food Spots · Admin" };
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const { profile, user } = await requireAdmin();
   const name = [profile.first_name, profile.last_name].filter(Boolean).join(" ") || user.email || "Administrator";

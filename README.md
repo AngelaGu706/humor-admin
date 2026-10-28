@@ -1,8 +1,46 @@
-# NYC Food Spots · Admin
+# AI Workspace · Admin
 
-Week 6 administrator app for [NYC Food Spots](https://github.com/AngelaGu706/hello-world), built with Next.js, React, and the existing Supabase database.
+Week 7 adds a course AI observability workspace to the Week 6 [NYC Food Spots](https://github.com/AngelaGu706/hello-world) administrator app. Built with Next.js, React, and Supabase.
 
-## Features
+## Course workspace (Week 7)
+
+The root URL opens `/studio`. Food management remains at `/admin`; each workspace has its own Google session and database administrator check.
+
+The course workspace reads the existing teaching database, not the food database. It does not manufacture food-app generation traces or copy teaching records into the original app.
+
+| Feature | Existing course table | Operations |
+| --- | --- | --- |
+| Users | profiles | Read |
+| Prompt chain runs | llm_prompt_chains | Read |
+| Chain templates | humor_flavors | Read |
+| Prompt steps | humor_flavor_steps | Read |
+| Chain mix | humor_flavor_mix | Read, update |
+| Terms | terms | Create, read, update, delete |
+| AI content | captions | Read |
+| Generation requests | caption_requests | Read |
+| Generation examples | caption_examples | Create, read, update, delete |
+| Models | llm_models | Create, read, update, delete |
+| Providers | llm_providers | Create, read, update, delete |
+| Model responses | llm_model_responses | Read |
+| Signup domains | allowed_signup_domains | Create, read, update, delete |
+| Email whitelist | whitelist_email_addresses | Create, read, update, delete |
+| Images | images | Read, view |
+
+Lists support search and pagination. Record detail pages link requests, chain runs, model responses, prompts, images, and generated captions. Forms use foreign-key selectors, server-side field allowlists, type checks, audit defaults, and optimistic concurrency checks. A conflicting edit is rejected rather than overwriting a newer version. Foreign-key violations return a recoverable message.
+
+Neither the food app nor the inspected Funnystudy front end provides an image upload flow. Existing course images are viewable; the conditional image-upload requirement is not enabled.
+
+### Course connection
+
+1. Configure `COURSE_SUPABASE_URL` and `COURSE_SUPABASE_PUBLISHABLE_KEY` with the existing course project. These two values are used only by server code. No service-role key is used.
+2. Preserve the course database's existing RLS policies. All course queries run with the signed-in user's JWT. The workspace verifies Google identity and the current boolean `profiles.is_superadmin` flag on every loader and mutation.
+3. The database owner must assign the intended Google account the existing superadmin role. The UI cannot grant administrator privileges or edit profiles.
+4. Add the desired deployment's `/auth/course/callback` URL to that course project's redirect allowlist. For local testing, add `http://127.0.0.1:3017/auth/course/callback`. Keep the existing Site URL and Funnystudy redirects.
+5. Sign in at `/course-login`. Course sign-out does not remove the separate food session.
+
+Teaching data remains historical course data. Read counts reflect the database, including its imported records.
+
+## Food workspace (Week 6)
 
 - Overview: exact community totals, approval rate, 14-day creation chart, favorite content, and popular neighborhoods.
 - People: paginated read-only profiles and administrator status.
@@ -48,6 +86,8 @@ Deletes require typing the content's title in the UI. They are permanent; depend
 - `npm test`: authorization matrix, role revocation, content validation, and mutation endpoint protection.
 - `npm run lint`
 - `npm run build`
+
+In restricted local environments, `npm run build -- --webpack` avoids Turbopack's temporary worker-port requirement. The course checks additionally cover resource/field allowlists, role revocation, denied anonymous and cross-origin mutations, validation, version conflicts, and database constraint errors. The actual teaching table definitions, identity IDs, audit defaults, and foreign keys were also exercised in an isolated local PostgreSQL-compatible database for all six CRUD resources and mix updates.
 
 The migration has additionally been tested in an isolated PostgreSQL-compatible database against 1,102 content records, including ordinary-user self-promotion denial, admin CRUD, denied anonymous access, exact statistics, repeat installation, and role revocation. This does not replace checking the actual production policies after installation.
 

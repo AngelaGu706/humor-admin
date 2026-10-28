@@ -3,8 +3,11 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
-    const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
+  const course = /^\/(studio(?:\/|$)|api\/studio(?:\/|$)|course-login(?:\/|$)|auth\/course(?:\/|$))/.test(request.nextUrl.pathname);
+  const databaseUrl = course ? process.env.COURSE_SUPABASE_URL : process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const databaseKey = course ? process.env.COURSE_SUPABASE_PUBLISHABLE_KEY : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (databaseUrl && databaseKey) {
+    const supabase = createServerClient(databaseUrl, databaseKey, {
       cookies: {
         getAll: () => request.cookies.getAll(),
         setAll(values) {
@@ -19,4 +22,4 @@ export async function proxy(request: NextRequest) {
   response.headers.set("Cache-Control", "private, no-store");
   return response;
 }
-export const config = { matcher: ["/admin/:path*", "/api/:path*", "/login", "/access-denied", "/auth/:path*"] };
+export const config = { matcher: ["/admin/:path*", "/studio/:path*", "/api/:path*", "/login", "/course-login", "/access-denied", "/auth/:path*"] };
