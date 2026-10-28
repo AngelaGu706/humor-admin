@@ -15,8 +15,8 @@ export async function courseList(key: string, search: Search) {
   const q = (typeof search.q === "string" ? search.q : "").trim().slice(0, 120);
   if (q) {
     if (resource.search.length) {
-      // Only a literal substring is accepted; PostgREST filter syntax never comes from the caller.
-      const literal = q.replace(/[\\%_*,()."']/g, " ").replace(/\s+/g, " ").trim();
+      // Remove filter delimiters and wildcards, preserving punctuation in model names.
+      const literal = q.replace(/[\\%_*,()"']/g, " ").replace(/\s+/g, " ").trim();
       if (literal) query = query.or(resource.search.map(column => `${column}.ilike.%${literal}%`).join(","));
       else query = query.eq("id", resource.idType === "uuid" ? "00000000-0000-0000-0000-000000000000" : -1);
     } else if (validId(q, resource.idType === "uuid")) query = query.eq("id", q);
