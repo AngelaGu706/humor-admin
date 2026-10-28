@@ -19,15 +19,29 @@ export function requestStatus(row: Pick<FoodRequest, 'status' | 'created_at'>, n
   return row.status === 'running' && now - Date.parse(row.created_at) > 600000 ? 'Incomplete' : row.status === 'succeeded' ? 'Completed' : row.status === 'failed' ? 'Failed' : 'Running';
 }
 export function milliseconds(value: number | null) { return value === null ? '—' : `${(value / 1000).toFixed(2)}s`; }
-export async function foodRequests(page = 1, query = '') {
+export type FoodRequestFilter = 'all' | 'completed' | 'failed';
+export function requestFilter(value: unknown): FoodRequestFilter {
+  return value === 'completed' || value === 'failed' ? value : 'all';
+}
+export function foodRequestsUrl({ page = 1, q = '', status = 'all' }: { page?: number; q?: string; status?: FoodRequestFilter } = {}) {
+  const params = new URLSearchParams();
+  if (page > 1) params.set('page', String(page));
+  if (q.trim()) params.set('q', q.trim().slice(0, 120));
+  const filter = requestFilter(status);
+  if (filter !== 'all') params.set('status', filter);
+  return `/admin/requests${params.size ? `?${params}` : ''}`;
+}
+export async function foodRequests(page = 1, query = '', status: FoodRequestFilter = 'all') {
   const { supabase } = await requireAdmin();
   let builder = supabase.from('food_generation_requests').select('*', { count: 'exact' });
+  const filter = requestFilter(status);
+  if (filter !== 'all') builder = builder.eq('status', filter === 'completed' ? 'succeeded' : 'failed');
   const q = query.trim().slice(0, 120).replace(/[\\%_*,()"']/g, ' ').replace(/\s+/g, ' ').trim();
   if (q) builder = builder.or(`user_input.ilike.%${q}%,result_title.ilike.%${q}%`);
   const { data, count, error } = await builder.order('created_at', { ascending: false }).order('id').range((page - 1) * 20, page * 20 - 1);
   if (error) throw new Error('Could not load generation requests. Please try again.');
   const lastPage = Math.max(1, Math.ceil((count ?? 0) / 20));
-  if (page > lastPage) redirect(`/admin/requests?page=${lastPage}${query ? `&q=${encodeURIComponent(query)}` : ''}`);
+  if (page > lastPage) redirect(foodRequestsUrl({ page: lastPage, q: query, status: filter }));
   return { rows: (data ?? []) as FoodRequest[], count: count ?? 0 };
 }
 export async function foodRequest(id: string) {
