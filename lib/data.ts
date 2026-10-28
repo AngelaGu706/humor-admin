@@ -1,7 +1,7 @@
 import "server-only";
 import { requireAdmin } from "./auth";
 
-export type Generation = { id: string; user_id: string; title: string; prompt: string; content: string; created_at: string };
+export type Generation = { id: string; user_id: string; title: string; prompt: string; content: string; created_at: string; trace_id?: string | null };
 export type Profile = { id: string; first_name: string | null; last_name: string | null; is_superadmin: boolean };
 export type Vote = { id: string; user_id: string; generation_id: string; vote: "up" | "down"; created_at: string };
 export const PAGE_SIZE = 20;
@@ -15,12 +15,17 @@ export function displayName(profile?: Profile | null) {
 export function dateLabel(value: string) {
   return new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
-export async function generations(page = 1) {
+export async function generations(page = 1, id?: string) {
   const { supabase } = await requireAdmin();
-  const result = await supabase.from("generations").select("id, user_id, title, prompt, content, created_at", { count: "exact" })
-    .order("created_at", { ascending: false }).order("id").range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+  let query = supabase.from("generations").select("id, user_id, title, prompt, content, created_at", { count: "exact" })
+;
+  if (id) query = query.eq("id", id);
+  const result = await query.order("created_at", { ascending: false }).order("id").range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
   if (result.error) throw new Error("Could not load AI content. Please try again.");
-  return { rows: (result.data ?? []) as Generation[], count: result.count ?? 0 };
+  const rows = (result.data ?? []) as Generation[];
+  const traces = rows.length ? await supabase.from("food_generation_requests").select("id,generation_id").in("generation_id", rows.map(row => row.id)) : { data: [], error: null };
+  if (traces.error) throw new Error("Could not load generation traces. Please try again.");
+  return { rows: rows.map(row => ({ ...row, trace_id: traces.data?.find(trace => trace.generation_id === row.id)?.id ?? null })), count: result.count ?? 0 };
 }
 export async function profiles(page = 1) {
   const { supabase } = await requireAdmin();
