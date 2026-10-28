@@ -2,9 +2,17 @@
 
 Week 7 adds a course AI observability workspace to the Week 6 [NYC Food Spots](https://github.com/AngelaGu706/hello-world) administrator app. Built with Next.js, React, and Supabase.
 
+## Live food generation traces
+
+The food frontend now records its actual generation pipeline in the same food Supabase project used by this admin. `/admin/requests` lists the submitted input, selected cuisine/neighborhood, status, duration, and result. Each detail page links the input to the actual prompt steps, Gemini responses and saved recommendation. `/admin/media` links each newly generated pick back to its trace. The food overview displays recent requests.
+
+Install the additive migration in the [food app repository](https://github.com/AngelaGu706/hello-world/blob/main/supabase/migrations/20261028_food_observability.sql) before deploying the updated apps. New tables are readable only by existing food superadmins. RPCs derive write ownership from the caller and complete the trace and recommendation in one transaction. Neither frontend nor admin uses a service-role key.
+
+Historical and manually created recommendations have no recorded trace; these are labeled honestly. A trace keeps the original output if the displayed pick is edited or deleted later. Course teaching data remains a separate workspace and is not presented as food generation activity.
+
 ## Course workspace (Week 7)
 
-The root URL opens `/studio`. Food management remains at `/admin`; each workspace has its own Google session and database administrator check.
+The root URL opens the live food workspace at `/admin`. The course workspace is available at `/studio`. Food management remains at `/admin`; each workspace has its own Google session and database administrator check.
 
 The course workspace reads the existing teaching database, not the food database. It does not manufacture food-app generation traces or copy teaching records into the original app.
 
