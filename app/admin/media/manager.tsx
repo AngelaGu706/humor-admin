@@ -40,7 +40,7 @@ export default function MediaManager({ rows, count, page }: { rows: Generation[]
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not save this pick.");
-      dialog.current?.close(); setStatus(editing ? "Changes saved." : "Food pick created."); router.refresh();
+      dialog.current?.close(); setStatus(editing ? "Changes saved" : "Food pick created"); router.refresh();
     } catch (error) { setError(error instanceof Error ? error.message : "Could not save. Please try again."); }
     finally { setBusy(false); busyRef.current = false; }
   }
@@ -51,7 +51,7 @@ export default function MediaManager({ rows, count, page }: { rows: Generation[]
       const response = await fetch(`/api/media/${deleting.id}`, { method: "DELETE" });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not delete this pick.");
-      deleteDialog.current?.close(); setStatus("Food pick deleted.");
+      deleteDialog.current?.close(); setStatus("Food pick deleted");
       if (rows.length === 1 && page > 1) router.push(`/admin/media?page=${page - 1}`);
       router.refresh();
     } catch (error) { setError(error instanceof Error ? error.message : "Could not delete. Please try again."); }
